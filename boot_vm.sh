@@ -18,5 +18,15 @@ exec qemu-system-x86_64 \
 	-boot d \
 	-hda myvm10.img \
 	-name "win10 WM" \
-	-vnc 0.0.0.0:1 \
+	#-vnc 0.0.0.0:1 \
+	-rtc base=localtime,clock=vm,driftfix=slew \
+	-no-hpet \
+	-no-shutdown \
+	-global PIIX4_PM.disable_s3=1 \
+	-global PIIX4_PM.disable_s4=0 \
+	-realtime mlock=off \
+	-object iothread,id=iothread1 \
+	-object iothread,id=iothread2 \
+	-no-user-config \
+	-nodefaults \
 	$@
