@@ -5,9 +5,10 @@
 # dd if=/dev/zero of=disk.img bs=512 count=10000000
 
 # install from iso
-# ./boot_win.sh -cdrom /path/to/iso/os.iso
+# ./boot_win.sh -hda disk.img -cdrom /path/to/iso/os.iso
 
 # normal boot
+# ./boot_win.sh -hda disk.img -name "vm name"
 exec qemu-system-x86_64 \
 	-enable-kvm \
 	-cpu host,kvm=off \
@@ -16,8 +17,7 @@ exec qemu-system-x86_64 \
 	-m 4096 \
 	-realtime mlock=off \
 	-boot d \
-	-hda myvm10.img \
-	-name "win10 WM" \
+	$@ \
 	#-vnc 0.0.0.0:1 \
 	-rtc base=localtime,clock=vm,driftfix=slew \
 	-no-hpet \
@@ -28,5 +28,4 @@ exec qemu-system-x86_64 \
 	-object iothread,id=iothread1 \
 	-object iothread,id=iothread2 \
 	-no-user-config \
-	-nodefaults \
-	$@
+	-nodefaults
