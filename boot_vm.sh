@@ -5,10 +5,14 @@
 # dd if=/dev/zero of=disk.img bs=512 count=10000000
 
 # install from iso
-# ./boot_win.sh -hda disk.img -cdrom /path/to/iso/os.iso
+# ./boot_vm.sh -hda disk.img -cdrom /path/to/iso/os.iso
 
 # normal boot
-# ./boot_win.sh -hda disk.img -name "vm name"
+# ./boot_vm.sh -hda disk.img -name "vm name"
+#
+# Using spice protocol
+# remote-viewer spice://localhost:3001
+
 exec qemu-system-x86_64 \
 	-enable-kvm \
 	-cpu host,kvm=off \
@@ -18,7 +22,7 @@ exec qemu-system-x86_64 \
 	-realtime mlock=off \
 	-boot d \
 	$@ \
-	#-vnc 0.0.0.0:1 \
+	-vnc 0.0.0.0:1 \
 	-rtc base=localtime,clock=vm,driftfix=slew \
 	-no-hpet \
 	-no-shutdown \
@@ -28,4 +32,8 @@ exec qemu-system-x86_64 \
 	-object iothread,id=iothread1 \
 	-object iothread,id=iothread2 \
 	-no-user-config \
+	-vga qxl \
+	-spice port=3001,disable-ticketing -soundhw hda \
+	-device virtio-serial -chardev spicevmc,id=vdagent,debug=0,name=vdagent \
+	-device virtserialport,chardev=vdagent,name=com.redhat.spice.0 \
 	-nodefaults
