@@ -17,8 +17,8 @@ exec qemu-system-x86_64 \
 	-enable-kvm \
 	-cpu host,kvm=off \
 	-machine pc-i440fx-2.7,accel=kvm,usb=off,dump-guest-core=off,mem-merge=off \
-	-smp 6 \
-	-m 4096 \
+	-smp 2 \
+	-m 2048 \
 	-realtime mlock=off \
 	-boot d \
 	$@ \
@@ -33,7 +33,8 @@ exec qemu-system-x86_64 \
 	-object iothread,id=iothread2 \
 	-no-user-config \
 	-vga qxl \
-	-spice port=3001,disable-ticketing -soundhw hda \
+	-spice port=3001,tls-port=47001,disable-ticketing,x509-dir=/home/zeroway/tls,tls-channel=main,tls-channel=inputs \
+	-soundhw hda \
 	-device virtio-serial -chardev spicevmc,id=vdagent,debug=0,name=vdagent \
 	-device virtserialport,chardev=vdagent,name=com.redhat.spice.0 \
 	-nodefaults
