@@ -1,4 +1,4 @@
-# 显卡透传原理
+# PCI透传原理
 
 [参考 VGA GPU passthrough qemu虚拟桌面pci穿透](https://blog.csdn.net/hubbybob1/article/details/77101913)
 
@@ -36,6 +36,8 @@
 	[  106.509326] DMAR: Setting identity map for device 0000:00:14.0 [0x8cc23000 - 0x8ce6cfff]
 	[  106.750536] DMAR: Setting identity map for device 0000:00:02.0 [0x8d800000 - 0x8fffffff]
 
+## 显卡透传
+
 查看系统中的显卡信息(VGA)
 
 	lspci -nn
@@ -71,6 +73,41 @@
 			Subsystem: Intel Corporation Device [8086:3e90]
 			Kernel driver in use: vfio-pci
 			Kernel modules: i915
+
+## USB控制器透传
+
+	lspci -nn
+	00:14.0 USB controller [0c03]: Intel Corporation Device [8086:a2af]
+
+和显卡透出一样先解绑定
+
+	echo 0000:00:14.0 > /sys/bus/pci/devices/0000:00:14.0/driver/unbind
+
+使用vfio驱动
+
+	echo "vfio-pci" > /sys/bus/pci/devices/0000:00:14.0/driver_override
+	echo 8086 a2af > /sys/bus/pci/drivers/vfio-pci/new_id
+
+## 注意事项
+
+透传中需要将同组的设备全部透传使用[脚本get_groups.sh](get_groups.sh)查看组信息
+
+	./get_group.sh
+	IOMMU Group:0  00:00.0 Host bridge [0600]: Intel Corporation Device [8086:3e0f] (rev 07)
+	IOMMU Group:10  02:00.0 USB controller [0c03]: ASMedia Technology Inc. ASM1042A USB 3.0 Host Controller [1b21:1142]
+	IOMMU Group:11  03:00.0 Ethernet controller [0200]: Realtek Semiconductor Co., Ltd. RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller [10ec:8168] (rev 15)
+	IOMMU Group:1  00:02.0 VGA compatible controller [0300]: Intel Corporation Device [8086:3e90]
+	IOMMU Group:2  00:14.0 USB controller [0c03]: Intel Corporation Device [8086:a2af]
+	IOMMU Group:3  00:16.0 Communication controller [0780]: Intel Corporation Device [8086:a2ba]
+	IOMMU Group:4  00:17.0 SATA controller [0106]: Intel Corporation Device [8086:a282]
+	IOMMU Group:5  00:1c.0 PCI bridge [0604]: Intel Corporation Device [8086:a294] (rev f0)
+	IOMMU Group:6  00:1d.0 PCI bridge [0604]: Intel Corporation Device [8086:a29a] (rev f0)
+	IOMMU Group:7  00:1d.3 PCI bridge [0604]: Intel Corporation Device [8086:a29b] (rev f0)
+	IOMMU Group:8  00:1f.0 ISA bridge [0601]: Intel Corporation Device [8086:a2ca]
+	IOMMU Group:8  00:1f.2 Memory controller [0580]: Intel Corporation Device [8086:a2a1]
+	IOMMU Group:8  00:1f.3 Audio device [0403]: Intel Corporation Device [8086:a2f0]
+	IOMMU Group:8  00:1f.4 SMBus [0c05]: Intel Corporation Device [8086:a2a3]
+	IOMMU Group:9  01:00.0 Network controller [0280]: Intel Corporation Wireless 3165 [8086:3165] (rev 81)
 
 ## 使用方法
 

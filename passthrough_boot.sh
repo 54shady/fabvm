@@ -14,7 +14,7 @@ exec qemu-system-x86_64 \
 	-enable-kvm \
 	-cpu host,kvm=off \
 	-machine pc-i440fx-2.7,accel=kvm,usb=off,dump-guest-core=off,mem-merge=off \
-	-smp 2 \
+	-smp 4 \
 	-m 2048 \
 	-realtime mlock=off \
 	-boot d \
@@ -31,6 +31,7 @@ exec qemu-system-x86_64 \
 	-no-user-config \
 	-vga none \
 	-device vfio-pci,host=00:02.0,bus=pci.0,addr=0x2 \
+	-device vfio-pci,host=00:14.0 \
 	-full-screen \
 	-nodefaults \
 	-nographic
