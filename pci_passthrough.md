@@ -76,10 +76,18 @@
 
 ## USB控制器透传
 
+查看USB控制器信息(绑定的是xhci_hcd驱动)
+
 	lspci -nn
 	00:14.0 USB controller [0c03]: Intel Corporation Device [8086:a2af]
 
-和显卡透出一样先解绑定
+	lspci -nnk -s 0000:00:14.0
+	00:14.0 USB controller [0c03]: Intel Corporation Device [8086:a2af]
+			DeviceName: Onboard - Other
+			Subsystem: Intel Corporation Device [8086:a2af]
+			Kernel driver in use: xhci_hcd
+
+解除绑定默认驱动
 
 	echo 0000:00:14.0 > /sys/bus/pci/devices/0000:00:14.0/driver/unbind
 
@@ -87,6 +95,16 @@
 
 	echo "vfio-pci" > /sys/bus/pci/devices/0000:00:14.0/driver_override
 	echo 8086 a2af > /sys/bus/pci/drivers/vfio-pci/new_id
+
+## 使用脚本替代手动操作
+
+使用[vfio_bind.sh](vfio_bind.sh)绑定成vfio驱动
+
+	vfio_bind.sh 0000:00:02.0 0000:00:14.0
+
+使用[vfio_unbind.sh](vfio_unbind.sh)解除vfio绑定
+
+	vfio_unbind.sh 0000:00:02.0 0000:00:14.0
 
 ## 注意事项
 
