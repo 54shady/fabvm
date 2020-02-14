@@ -31,3 +31,36 @@
 ## PCI透传
 
 [PCI设备透传相关参考](pci_passthrough.md)
+
+## HID(keyboard, mouse, tablet)
+
+### 查看输入设备信息
+
+	lsusb
+	cat /proc/bus/input/devices
+
+### 使用不同的接口
+
+没有指定输入设备接口时
+
+- 默认使用ps2 keyboard和mouse
+- 退出gtk窗口需要ctrl_alt_g组合键
+- 鼠标不跟手,有飘动感
+- lsusb无设备(因为用的是ps2)
+
+指定使用usb keyboard,mouse接口(需要使用tablet驱动)
+
+- 不需要ctrl_alt_g组合键即可退出gtk窗口
+- 鼠标跟手情况良好,无飘动感
+- lsusb能发现usb设备
+
+qemu命令行参数添加
+
+	-usb -device usb-tablet
+
+- -usb使能usb控制器
+- -device usb-tablet使用tablet驱动keyboard和mouse
+
+单独使用usb-kbd或usb-mouse无法达到效果
+
+tablet是绝对坐标而mouse是相对坐标
