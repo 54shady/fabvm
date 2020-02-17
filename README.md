@@ -36,8 +36,9 @@
 
 ### 查看输入设备信息
 
-	lsusb
-	cat /proc/bus/input/devices
+- lsusb
+- cat /proc/bus/input/devices
+- xinput --list
 
 ### 使用不同的接口
 
@@ -64,3 +65,28 @@ qemu命令行参数添加
 单独使用usb-kbd或usb-mouse无法达到效果
 
 tablet是绝对坐标而mouse是相对坐标
+
+指定使用virtio-input设备
+
+使用tablet设备,默认无鼠标指针(需要修改显示设置才有鼠标指针)
+
+	-device virtio-tablet-pci
+
+修改显示设置让鼠标指针显示
+
+- Built-in Display ON
+- 800x600(4:3)
+- Rotation : Normal
+- Launcher placement : All display
+- Sticky edges : OFF
+- Display with smallest controls
+
+- 不需要ctrl_alt_g组合键即可退出gtk窗口
+- 鼠标跟手情况良好,无飘动感
+
+使用mouse
+
+	-device virtio-mouse-pci
+
+- 需要ctrl_alt_g组合键才能退出gtk窗口
+- 鼠标有飘动异常
