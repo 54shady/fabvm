@@ -27,7 +27,7 @@ exec qemu-system-x86_64 \
 	-object iothread,id=iothread2 \
 	-no-user-config \
 	-vga qxl \
-	-spice port=3001,tls-port=47001,disable-ticketing,x509-dir=/home/zeroway/tls,tls-channel=main,tls-channel=inputs \
+	-spice port=3001,disable-ticketing \
 	-soundhw hda \
 	-device virtio-serial -chardev spicevmc,id=vdagent,debug=0,name=vdagent \
 	-device virtserialport,chardev=vdagent,name=com.redhat.spice.0 \
