@@ -8,7 +8,10 @@
 
 # normal boot
 # ./boot-normal.sh -hda disk.img -name "vm name"
-#
+
+# 3 hdd boot example
+# ./boot-normal.sh -hda sda.qcow2 -hdb sdb.qcow2 -hdc sdc.qcow2 -drive file=disk.iso,index=3,media=cdrom
+
 # Using spice protocol
 # remote-viewer spice://localhost:3001
 
