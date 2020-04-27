@@ -83,7 +83,7 @@ do
 	#sed -i "s/$DISK_FILE_FULL_NAME/$TARGET_DISK_FULL_NAME/" $TARGET_XML_FULL_NAME
 
 	#(( [ $EDIT_IMAGE == "edit-base" ] ? TARGET_VM_FULL_NAME=$EDIT_IMAGE : TARGET_VM_FULL_NAME=${TARGET_VM_NAME}_$i ))
-	TARGET_VM_FULL_NAME=$([ "$EDIT_IMAGE" != "nop-edit-base" ] && echo "edit-base" || echo ${TARGET_VM_NAME}_$i)
+	TARGET_VM_FULL_NAME=$([ "$EDIT_IMAGE" != "nop-edit-base" ] && echo "edit-base" || echo ${TARGET_VM_NAME}-$i)
 	sed -i "s/$VM_NAME_STUB/$TARGET_VM_FULL_NAME/" $TARGET_XML_FULL_NAME
 
 	#echo "Replace $VM_NAME_STUB ==> $TARGET_VM_FULL_NAME"
