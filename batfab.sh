@@ -31,14 +31,18 @@ print_usage()
 BASE_IMAGE="nop-base"
 EDIT_IMAGE="nop-edit-base"
 NUMBER=1
+START_INDEX=1
+CONFIG_VM_IP=0
 
-while getopts "b:e:t:n:h" flag; do
+while getopts "b:e:t:n:s:hi" flag; do
 	case $flag in
 		e) EDIT_IMAGE="$OPTARG" ;;
 		b) BASE_IMAGE="$OPTARG" ;;
 		t) SEED_TEMPLATE="$OPTARG" ;;
 		n) NUMBER="$OPTARG" ;;
+		s) START_INDEX="$OPTARG" ;;
 		h) print_usage $0 ;;
+		i) CONFIG_VM_IP=1 ;;
 		*) print_usage $0 ;;
 	esac
 done
@@ -52,7 +56,7 @@ echo "Template ==> $SEED_TEMPLATE"
 echo "Instance ==> $NUMBER"
 
 ##for i in `seq 1 3`; do virsh destroy demo_$i; virsh undefine demo_$i; done
-for i in `seq 1 $NUMBER`
+for i in `seq $START_INDEX $NUMBER`
 do
 	# fork the SEED_TEMPLATE to instance xml file
 	TARGET_XML_FULL_NAME=$TARGET_PREFIX.$i$XML_SUFFIX
@@ -82,6 +86,27 @@ do
 	#echo "Replace $DISK_FILE_FULL_NAME ==> $TARGET_DISK_FULL_NAME"
 	#sed -i "s/$DISK_FILE_FULL_NAME/$TARGET_DISK_FULL_NAME/" $TARGET_XML_FULL_NAME
 
+	# a slow version, but work ;-)
+	if [ $CONFIG_VM_IP -eq 1 ]
+	then
+		# yep, we got 15 nbd device on my platform, figure out yours
+		Index=$(($i % 15))
+		sleep 1
+		qemu-nbd -d /dev/nbd$Index
+		sleep 1
+		qemu-nbd -c /dev/nbd$Index $TARGET_DISK_FULL_NAME
+		sleep 1
+		mount /dev/nbd$(($Index))p3 /mnt
+		sleep 1
+		# for centos distro
+		sed "s/STUB/$(($i+110))/" ifcfg-eth0 > /mnt/etc/sysconfig/network-scripts/ifcfg-eth0
+		umount /mnt
+		sleep 1
+		qemu-nbd -d /dev/nbd$Index
+		sleep 1
+	fi
+
+	# name virtual machine
 	#(( [ $EDIT_IMAGE == "edit-base" ] ? TARGET_VM_FULL_NAME=$EDIT_IMAGE : TARGET_VM_FULL_NAME=${TARGET_VM_NAME}_$i ))
 	TARGET_VM_FULL_NAME=$([ "$EDIT_IMAGE" != "nop-edit-base" ] && echo "edit-base" || echo ${TARGET_VM_NAME}-$i)
 	sed -i "s/$VM_NAME_STUB/$TARGET_VM_FULL_NAME/" $TARGET_XML_FULL_NAME

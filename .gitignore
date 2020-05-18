@@ -1,2 +1,5 @@
 *.img
 trace-*
+*.qcow2
+inst*
+*.base
