@@ -16,9 +16,9 @@ def remote_test_routine(arg, lock):
     except paramiko.ssh_exception.NoValidConnectionsError as err:
         print("NoValidConnectionsError : " + ipaddr)
     else:
-        order = '/root/lmbench3/bin/arm-linux/stream'
+        order = '/root/sysbench-1.0.15/src/sysbench cpu --time=10 --threads=64 --cpu-max-prime=10000 run'
         stdin,stdout,stderr=s.exec_command(order)
-        result = stderr.read()
+        result = stdout.read()
         lock.acquire()
         print("===Testing %s Start===" % ipaddr)
         for i in range(0, len(result.splitlines())):
