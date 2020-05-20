@@ -7,7 +7,7 @@ import random
 import paramiko
 import argparse
 
-def remote_test_routine(arg, lock):
+def remote_test_routine(arg, lock, cmd):
     ipaddr = "172.28.107.%d" % (110 + arg)
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -16,9 +16,8 @@ def remote_test_routine(arg, lock):
     except paramiko.ssh_exception.NoValidConnectionsError as err:
         print("NoValidConnectionsError : " + ipaddr)
     else:
-        order = '/root/sysbench-1.0.15/src/sysbench cpu --time=10 --threads=64 --cpu-max-prime=10000 run'
-        stdin,stdout,stderr=s.exec_command(order)
-        result = stdout.read()
+        stdin,stdout,stderr=s.exec_command(cmd)
+        result = stdout.read().decode()
         lock.acquire()
         print("===Testing %s Start===" % ipaddr)
         for i in range(0, len(result.splitlines())):
@@ -29,12 +28,19 @@ def remote_test_routine(arg, lock):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run Remote Test")
-    parser.add_argument("-t", "--thread", type=int,
+
+    # default one thread
+    parser.add_argument("-t", "--thread", type=int,default=1,
                         help="numbers of threads")
+
+    # the actual command for remote machine
+    parser.add_argument("-c", "--command", type=str,required=True,
+                        help='''Test command, -c 'ls -l' ''')
 
     mutex = threading.Lock()
 
     args = parser.parse_args()
     for i in range(args.thread):
-        t = threading.Thread(target=remote_test_routine, args=(i+1, mutex,))
+        t = threading.Thread(target=remote_test_routine,
+                args=(i+1, mutex, args.command))
         t.start()
