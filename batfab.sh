@@ -91,15 +91,18 @@ do
 	then
 		# yep, we got 15 nbd device on my platform, figure out yours
 		Index=$(($i % 15))
+		# skip the error one
+		nbdSize=`cat /sys/block/nbd$Index/size`
+		[ $nbdSize -ne 0 ] && qemu-nbd -d /dev/nbd$Index && Index=$(($Index + 1))
+
 		sleep 1
-		qemu-nbd -d /dev/nbd$Index
+		qemu-nbd -n -c /dev/nbd$Index $TARGET_DISK_FULL_NAME
 		sleep 1
-		qemu-nbd -c /dev/nbd$Index $TARGET_DISK_FULL_NAME
-		sleep 1
-		mount /dev/nbd$(($Index))p3 /mnt
+		[ -e /dev/nbd$(($Index))p3 ] && mount /dev/nbd$(($Index))p3 /mnt
 		sleep 1
 		# for centos distro
-		sed "s/STUB/$(($i+110))/" ifcfg-eth0 > /mnt/etc/sysconfig/network-scripts/ifcfg-eth0
+		sed "s/STUB/$(($i+130))/" ifcfg-eth0 > /mnt/etc/sysconfig/network-scripts/ifcfg-eth0
+		sync
 		umount /mnt
 		sleep 1
 		qemu-nbd -d /dev/nbd$Index

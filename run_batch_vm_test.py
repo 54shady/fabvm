@@ -8,7 +8,7 @@ import paramiko
 import argparse
 
 def remote_test_routine(arg, lock, cmd):
-    ipaddr = "172.28.107.%d" % (110 + arg)
+    ipaddr = "172.28.107.%d" % (130 + arg)
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
