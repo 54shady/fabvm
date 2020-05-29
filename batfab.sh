@@ -98,10 +98,20 @@ do
 		sleep 1
 		qemu-nbd -n -c /dev/nbd$Index $TARGET_DISK_FULL_NAME
 		sleep 1
-		[ -e /dev/nbd$(($Index))p3 ] && mount /dev/nbd$(($Index))p3 /mnt
+
+		# assume centos root partition is /dev/nbdNp3
+		#[ -e /dev/nbd$(($Index))p3 ] && mount /dev/nbd$(($Index))p3 /mnt
+
+		# assume ubuntu(uos) root partition is /dev/nbdNp2
+		[ -e /dev/nbd$(($Index))p2 ] && mount /dev/nbd$(($Index))p2 /mnt
+
 		sleep 1
 		# for centos distro
 		sed "s/STUB/$(($i+130))/" ifcfg-eth0 > /mnt/etc/sysconfig/network-scripts/ifcfg-eth0
+
+		# for ubuntu, uos
+		sed "s/STUB/$(($i+130))/" interfaces > /mnt/etc/network/interfaces
+
 		sync
 		umount /mnt
 		sleep 1

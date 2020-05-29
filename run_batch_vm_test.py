@@ -18,15 +18,17 @@ def remote_test_routine(arg, lock, cmd):
     else:
         stdin,stdout,stderr=s.exec_command(cmd)
         result = stdout.read().decode()
-        lock.acquire()
-        print("===Testing %s Start===" % ipaddr)
-        for i in range(0, len(result.splitlines())):
-            print(result.splitlines()[i])
-        print("===Testing %s End===\n" % ipaddr)
-        lock.release()
+        lres[arg] = result
 
 
 if __name__ == '__main__':
+    # insert each thread result into a list
+    lres = []
+
+    # default max thread maybe 50?
+    for i in range(0, 50):
+        lres.append(0)
+
     parser = argparse.ArgumentParser(description="Run Remote Test")
 
     # default one thread
@@ -40,7 +42,19 @@ if __name__ == '__main__':
     mutex = threading.Lock()
 
     args = parser.parse_args()
+    lthreads = []
     for i in range(args.thread):
         t = threading.Thread(target=remote_test_routine,
                 args=(i+1, mutex, args.command))
+        lthreads.append(t)
         t.start()
+
+    for t in lthreads:
+        t.join()
+
+    print("===lrest start===")
+    for i in range(0, len(lres)):
+        if lres[i] != 0:
+            for j in range(0, len(lres[i].splitlines())):
+                print("line%d" % j, "%2d" % i, lres[i].splitlines()[j])
+    print("===lrest end===")
