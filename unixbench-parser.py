@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-#import subprocess
 from subprocess import *
 import sys
 import argparse
@@ -20,6 +19,11 @@ def run_command(cmd, stdin=None, stdout=PIPE, stderr=None):
 
 
 def parser_all(resultfile):
+    '''
+    the resultfile should be like below as example
+    10vm-run-k4q2.txt
+    which stand for 10 VMS and kernel version 4.x, qemu version 2.x
+    '''
     # predefine the line number stub for specify file
     d = {
         'execl': 'line98',
@@ -40,7 +44,13 @@ def parser_all(resultfile):
     '''
     for k in d:
         sfile = resultfile
-        tempfile = '%s-%s-%s-k4q2.dat' % (d[k], k, resultfile.split('-')[0])
+        # kernel and qemu version
+        kq = resultfile.split('-')[2][0:4]
+
+        # number of virtual machines
+        nr_vms = resultfile.split('-')[0]
+
+        tempfile = '%s-%s-%s-%s.dat' % (d[k], k, nr_vms, kq)
         cmd = 'cp %s %s' % (sfile, tempfile)
         run_command(cmd)
 
@@ -55,13 +65,13 @@ def parser_all(resultfile):
         run_command(cmd)
 
         # dropout the linestub for plt script, final data file name
-        tfile = '%s-%s-k4q2.dat' % (k, resultfile.split('-')[0])
+        tfile = '%s-%s-%s.dat' % (k, nr_vms, kq)
         cmd = 'mv %s %s' % (tempfile, tfile)
         run_command(cmd)
 
 
 def print_usage(prog):
-    usage = 'Usage:\n%s 20vm-run-k4q2.txt \n%s pipecs*.dat' % (prog, prog)
+    usage = 'Usage:\n%s 20vm-run-k4q2.txt \n%s pipecs*k4q2.dat' % (prog, prog)
     print(usage)
 
 
@@ -80,8 +90,10 @@ if __name__ == '__main__':
         sidefile = 'side-' + index[0] + '.dat'
         lrecord = []
         for i in range(1, len(sys.argv)):
+            # get first row of first column, which is the mean value
             cmd = '''awk 'NR == 1 { print $1 }' %s''' % sys.argv[i]
             r = run_command(cmd)
+            # make one record
             record = '%s %s' % (sys.argv[i].split('-')[1][:-2], r)
             lrecord.append(record)
         with open(sidefile, "w") as f:
