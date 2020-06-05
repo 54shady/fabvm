@@ -87,7 +87,8 @@ if __name__ == '__main__':
         parser_all(sys.argv[1])
     elif argc > 2:
         index = sys.argv[1].split('-')
-        sidefile = 'side-' + index[0] + '.dat'
+        kqv = index[2][0:4]
+        sidefile = 'side-' + index[0] + '-' + kqv + '.dat'
         lrecord = []
         for i in range(1, len(sys.argv)):
             # get first row of first column, which is the mean value
@@ -101,9 +102,15 @@ if __name__ == '__main__':
                 f.write("%s" % lrecord[i])
         cmd = '''sed -i "s/STUB/%s/g" side.plt''' % index[0]
         run_command(cmd)
+        cmd = '''sed -i "s/KQV/%s/g" side.plt''' % kqv
+        run_command(cmd)
         cmd = 'gnuplot side.plt'
         run_command(cmd)
+
+        # roll back the side.plt the way it used to be
         cmd = '''sed -i "s/%s/STUB/g" side.plt''' % index[0]
+        run_command(cmd)
+        cmd = '''sed -i "s/%s/KQV/g" side.plt''' % kqv
         run_command(cmd)
     else:
         print_usage(sys.argv[0])

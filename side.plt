@@ -7,4 +7,4 @@ set output 'STUB.png'
 set style data linespoints
 set key noenhanced
 
-plot 'side-STUB.dat' u 1:2 title "STUB"
+plot 'side-STUB-KQV.dat' u 1:2 title "STUB-KQV"
