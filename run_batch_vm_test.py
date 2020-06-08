@@ -70,7 +70,10 @@ if __name__ == '__main__':
         if iargs.mpv:
             # for mpv drop frame test, only print the last record
             r = lres[i].splitlines()[len(lres[i].splitlines()) - 1]
-            df += int(r.decode().split(' ')[-1])
+            try:
+                df += int(r.decode().split(' ')[-1])
+            except ValueError:
+                pass
             print("%02d" % i, r.decode().split(' ')[-1], df)
         else:
             for j in range(0, len(lres[i].splitlines())):
