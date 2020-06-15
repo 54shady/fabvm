@@ -9,7 +9,7 @@ import argparse
 
 
 def remote_test_routine(index, lock, args):
-    ipaddr = "172.28.107.%d" % (116 + index)
+    ipaddr = "172.28.109.%d" % (100 + index)
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
@@ -39,6 +39,10 @@ if __name__ == '__main__':
     parser.add_argument("--mpv", help="For mpv frame drop test only",
                         action="store_true")
 
+    # for systemd base distro startup time measure
+    parser.add_argument("--systemd", help="Systemd Base Distro Startup Time",
+                        action="store_true")
+
     # printout stderr instead of stdout
     parser.add_argument("--stderr",
                         help="Read process command result from stderr",
@@ -64,7 +68,6 @@ if __name__ == '__main__':
     for t in lthreads:
         t.join()
 
-    print("===lrest start===")
     df = 0
     for i in range(1, iargs.thread + 1):
         if iargs.mpv:
@@ -75,10 +78,24 @@ if __name__ == '__main__':
             except ValueError:
                 pass
             print("%02d" % i, r.decode().split(' ')[-1], df)
+        elif iargs.systemd:
+            # for linux(systemd) boot time aa.bb second
+            if len(lres[i].split(' ')) == 15: # less then 60s
+                record = "%2d %s" % (i, lres[i].split(' ')[-1][:-4])
+            else: # more then 60s
+                if lres[i].split(' ')[-2] == '1min':
+                    minute = 60.0
+                    tmp = float(lres[i].split(' ')[-1][:-4])
+                    if tmp >= 60.0: # this means it is micro second
+                        second = 0
+                    else:
+                        second = tmp
+                    time = minute + second
+                    record = "%02d %2f" % (i, time)
+            print(record)
         else:
             for j in range(0, len(lres[i].splitlines())):
                 print("line%d" % j, "%2d" % i, lres[i].splitlines()[j])
 
     # calcute the average drop frames
-    print(df / iargs.thread) if iargs.mpv else None
-    print("===lrest end===")
+    print(df / iargs.thread) if iargs.mpv else ""

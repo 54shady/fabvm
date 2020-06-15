@@ -40,7 +40,7 @@ if __name__ == '__main__':
                         help="Skip the N of previous VMs")
 
     parser.add_argument("--action", type=str, required=True,
-                        choices=["start", "destroy", "undefine"],
+                        choices=["start", "destroy", "undefine", "reset"],
                         help="virsh X")
 
     # input args
