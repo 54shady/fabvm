@@ -13,7 +13,7 @@ def remote_test_routine(index, lock, args):
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        s.connect(hostname=ipaddr, username="root", password="0")
+        s.connect(hostname=ipaddr, username=args.user, password="0")
     except paramiko.ssh_exception.NoValidConnectionsError as err:
         print("NoValidConnectionsError : " + ipaddr)
     else:
@@ -34,6 +34,9 @@ if __name__ == '__main__':
     # the actual command for remote machine
     parser.add_argument("-c", "--command", type=str, required=True,
                         help='''Test command, -c 'ls -l' ''')
+
+    parser.add_argument("--user", type=str, default="root",
+                        help="login user name")
 
     # for mpv test only
     parser.add_argument("--mpv", help="For mpv frame drop test only",
