@@ -128,5 +128,4 @@ do
 
 	sed -i "s/$MACADDR_CODE_STUB/$mac1:$mac2/" $TARGET_XML_FULL_NAME
 	virsh define $TARGET_XML_FULL_NAME
-	virsh start $TARGET_VM_FULL_NAME
 done
