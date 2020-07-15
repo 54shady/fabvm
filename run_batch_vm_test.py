@@ -31,6 +31,9 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--thread", type=int, default=1,
                         help="numbers of threads")
 
+    parser.add_argument("--line", type=int,
+                        help="filter specify the line")
+
     # the actual command for remote machine
     parser.add_argument("-c", "--command", type=str, required=True,
                         help='''Test command, -c 'ls -l' ''')
@@ -97,8 +100,11 @@ if __name__ == '__main__':
                     record = "%02d %2f" % (i, time)
             print(record)
         else:
-            for j in range(0, len(lres[i].splitlines())):
-                print("line%d" % j, "%2d" % i, lres[i].splitlines()[j])
+            if iargs.line:
+                print(lres[i].splitlines()[iargs.line])
+            else:
+                for j in range(0, len(lres[i].splitlines())):
+                    print("line%d" % j, "%2d" % i, lres[i].splitlines()[j])
 
     # calcute the average drop frames
     print(df / iargs.thread) if iargs.mpv else ""
