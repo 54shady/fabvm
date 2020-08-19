@@ -90,3 +90,7 @@ tablet是绝对坐标而mouse是相对坐标
 
 - 需要ctrl_alt_g组合键才能退出gtk窗口
 - 鼠标有飘动异常
+
+## Iptable(DNAT/SNAT)
+
+[iptables-dnat-snat](./iptables.md)
