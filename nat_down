@@ -1,18 +1,28 @@
 #!/bin/bash
 
-# seetup bridge name
-BRIDGE="natbr0"
+source net_util
 
 if [ -n "$1" ]; then
 	echo "Tearing down network bridge for $1" > /var/log/qemu/nat.log
+
+	setup_network
+	iptables -t nat	   -D POSTROUTING -s $NETWORK/$NETMASK -j MASQUERADE
+	iptables -t filter -D INPUT -i $BRIDGE -p tcp -m tcp --dport 67 -j ACCEPT
+	iptables -t filter -D INPUT -i $BRIDGE -p udp -m udp --dport 67 -j ACCEPT
+	iptables -t filter -D INPUT -i $BRIDGE -p tcp -m tcp --dport 53 -j ACCEPT
+	iptables -t filter -D INPUT -i $BRIDGE -p udp -m udp --dport 53 -j ACCEPT
+	iptables -t filter -D FORWARD -i $BRIDGE -o $BRIDGE -j ACCEPT
+	iptables -t filter -D FORWARD -s $NETWORK/$NETMASK -i $BRIDGE -j ACCEPT
+	iptables -t filter -D FORWARD -d $NETWORK/$NETMASK -o $BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
+	iptables -t filter -D FORWARD -o $BRIDGE -j REJECT --reject-with icmp-port-unreachable
+	iptables -t filter -D FORWARD -i $BRIDGE -j REJECT --reject-with icmp-port-unreachable
+
 	ifconfig $1 down
 	brctl delif "$BRIDGE" $1
 
 	nrtap=$(brctl show $BRIDGE | grep $BRIDGE | awk '{ print NF }')
 	[ $nrtap -eq 3 ] && ifconfig $BRIDGE down && brctl delbr $BRIDGE && pkill dnsmasq
 
-	#iptables -t nat -F
-	#iptables -t filter -F
 	exit 0
 else
 	echo "Error: no interface specified"  > /var/log/qemu/nat.log

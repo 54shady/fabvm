@@ -1,46 +1,10 @@
 #!/bin/bash
 
-# Set to the name of your bridge
-BRIDGE=natbr0
-
-# Network information
-NETWORK=
-NETMASK=255.255.255.0
-GATEWAY=
-DHCPRANGE=
-
-# Optionally parameters to enable PXE support
-TFTPROOT=
-BOOTP=
-
-do_brctl()
-{
-	brctl "$@"
-}
-
-do_ifconfig()
-{
-	ifconfig "$@"
-}
-
-do_dd()
-{
-	dd "$@"
-}
-
-do_iptables_restore()
-{
-	iptables-restore "$@"
-}
-
-do_dnsmasq()
-{
-	dnsmasq "$@"
-}
+source net_util
 
 check_bridge()
 {
-	if do_brctl show | grep "^$1" > /dev/null 2> /dev/null; then
+	if brctl show | grep "^$1" > /dev/null 2> /dev/null; then
 		return 1
 	else
 		return 0
@@ -49,46 +13,34 @@ check_bridge()
 
 create_bridge()
 {
-	do_brctl addbr "$1"
-	do_brctl stp "$1" off
-	do_brctl setfd "$1" 0
-	do_ifconfig "$1" "$GATEWAY" netmask "$NETMASK" up
+	brctl addbr "$1"
+	brctl stp "$1" off
+	brctl setfd "$1" 0
+	ifconfig "$1" "$GATEWAY" netmask "$NETMASK" up
 }
 
 enable_ip_forward()
 {
-	echo 1 | do_dd of=/proc/sys/net/ipv4/ip_forward > /dev/null
+	echo 1 | dd of=/proc/sys/net/ipv4/ip_forward > /dev/null
 }
 
 add_filter_rules()
 {
-	do_iptables_restore <<EOF
-*nat
-:PREROUTING ACCEPT [61:9671]
-:POSTROUTING ACCEPT [121:7499]
-:OUTPUT ACCEPT [132:8691]
--A POSTROUTING -s $NETWORK/$NETMASK -j MASQUERADE
-COMMIT
-*filter
-:INPUT ACCEPT [1453:976046]
-:FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [1605:194911]
--A INPUT -i $BRIDGE -p tcp -m tcp --dport 67 -j ACCEPT
--A INPUT -i $BRIDGE -p udp -m udp --dport 67 -j ACCEPT
--A INPUT -i $BRIDGE -p tcp -m tcp --dport 53 -j ACCEPT
--A INPUT -i $BRIDGE -p udp -m udp --dport 53 -j ACCEPT
--A FORWARD -i $1 -o $1 -j ACCEPT
--A FORWARD -s $NETWORK/$NETMASK -i $BRIDGE -j ACCEPT
--A FORWARD -d $NETWORK/$NETMASK -o $BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
--A FORWARD -o $BRIDGE -j REJECT --reject-with icmp-port-unreachable
--A FORWARD -i $BRIDGE -j REJECT --reject-with icmp-port-unreachable
-COMMIT
-EOF
+	iptables -t nat -A POSTROUTING -s $NETWORK/$NETMASK -j MASQUERADE
+	iptables -t filter -A INPUT -i $BRIDGE -p tcp -m tcp --dport 67 -j ACCEPT
+	iptables -t filter -A INPUT -i $BRIDGE -p udp -m udp --dport 67 -j ACCEPT
+	iptables -t filter -A INPUT -i $BRIDGE -p tcp -m tcp --dport 53 -j ACCEPT
+	iptables -t filter -A INPUT -i $BRIDGE -p udp -m udp --dport 53 -j ACCEPT
+	iptables -t filter -A FORWARD -i $1 -o $1 -j ACCEPT
+	iptables -t filter -A FORWARD -s $NETWORK/$NETMASK -i $BRIDGE -j ACCEPT
+	iptables -t filter -A FORWARD -d $NETWORK/$NETMASK -o $BRIDGE -m state --state RELATED,ESTABLISHED -j ACCEPT
+	iptables -t filter -A FORWARD -o $BRIDGE -j REJECT --reject-with icmp-port-unreachable
+	iptables -t filter -A FORWARD -i $BRIDGE -j REJECT --reject-with icmp-port-unreachable
 }
 
 start_dnsmasq()
 {
-	do_dnsmasq \
+	dnsmasq \
 		--strict-order \
 		--except-interface=lo \
 		--interface=$BRIDGE \
@@ -98,37 +50,7 @@ start_dnsmasq()
 		--conf-file="" \
 		--pid-file=/var/run/qemu-dnsmasq-$BRIDGE.pid \
 		--dhcp-leasefile=/var/run/qemu-dnsmasq-$BRIDGE.leases \
-		--dhcp-no-override \
-		${TFTPROOT:+"--enable-tftp"} \
-		${TFTPROOT:+"--tftp-root=$TFTPROOT"} \
-		${BOOTP:+"--dhcp-boot=$BOOTP"}
-}
-
-do_filter_ip()
-{
-	ifconfig $1 | grep "inet addr" | awk -F"[:.]" '{ print $2 }'
-}
-
-do_filter_ip()
-{
-	ifconfig $1 > /dev/null 2>&1 && \
-		echo $(ifconfig $1 | grep "inet addr" | awk -F"[:.]" '{ print $2 }')
-}
-
-setup_network()
-{
-	for nic in eth0 br0 wlan0 br1
-	do
-		res=$(do_filter_ip $nic)
-		[ ! -z $res ] && [ $res -eq "172" ] && \
-			NETWORK=194.168.53.0 && \
-			GATEWAY=194.168.53.1 && \
-			DHCPRANGE=194.168.53.100,194.168.53.254
-		[ ! -z $res ] && [ $res -eq "192" ] && \
-			NETWORK=193.168.53.0 && \
-			GATEWAY=193.168.53.1 && \
-			DHCPRANGE=193.168.53.100,193.168.53.254
-	done
+		--dhcp-no-override
 }
 
 setup_bridge_nat()
@@ -145,6 +67,6 @@ setup_bridge_nat()
 setup_bridge_nat "$BRIDGE"
 
 if test "$1" ; then
-	do_ifconfig "$1" 0.0.0.0 up
-	do_brctl addif "$BRIDGE" "$1"
+	ifconfig "$1" 0.0.0.0 up
+	brctl addif "$BRIDGE" "$1"
 fi
