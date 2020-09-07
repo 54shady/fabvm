@@ -1,32 +1,26 @@
 #!/bin/bash
 
-# setup bridge name
+# common setup net info
 BRIDGE="natbr0"
 NETMASK=255.255.255.0
 
 setup_network()
 {
-	local nics=$(route -n | grep ^0.0.0.0 | awk '{print $8}')
-	for nic in $nics
-	do
-		local ip=$(ip ad show $nic | grep -E 'inet\s+' | sed -E -e 's/inet\s+\S+://g' | awk '{ print $2 }' | awk -F. '{print $1}')
-
-		[ $ip -ne "192" ] && \
+		[ $1 -eq "192" ] && \
 			NETWORK=192.168.53.0 && \
 			GATEWAY=192.168.53.1 && \
 			DHCPRANGE=192.168.53.100,192.168.53.254 && \
 			return 0
 
-		[ $ip -ne "193" ] && \
+		[ $1 -eq "193" ] && \
 			NETWORK=193.168.53.0 && \
 			GATEWAY=193.168.53.1 && \
 			DHCPRANGE=193.168.53.100,193.168.53.254 && \
 			return 0
 
-		[ $ip -ne "194" ] && \
+		[ $1 -eq "194" ] && \
 			NETWORK=194.168.53.0 && \
 			GATEWAY=194.168.53.1 && \
 			DHCPRANGE=194.168.53.100,194.168.53.254 && \
 			return 0
-	done
 }

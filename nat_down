@@ -5,7 +5,8 @@ source net_util
 if [ -n "$1" ]; then
 	echo "Tearing down network bridge for $1" > /var/log/qemu/nat.log
 
-	setup_network
+	pickip=`python -c 'import fall; print fall.get_netcard()'`
+	setup_network $pickip
 	iptables -t nat	   -D POSTROUTING -s $NETWORK/$NETMASK -j MASQUERADE
 	iptables -t filter -D INPUT -i $BRIDGE -p tcp -m tcp --dport 67 -j ACCEPT
 	iptables -t filter -D INPUT -i $BRIDGE -p udp -m udp --dport 67 -j ACCEPT

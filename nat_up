@@ -56,7 +56,8 @@ start_dnsmasq()
 setup_bridge_nat()
 {
 	if check_bridge "$1" ; then
-		setup_network
+		pickip=`python -c 'import fall; print fall.get_netcard()'`
+		setup_network $pickip
 		create_bridge "$1"
 		enable_ip_forward
 		add_filter_rules "$1"
