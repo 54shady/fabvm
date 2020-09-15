@@ -56,9 +56,12 @@ HOST上有一张有线网卡eth0(br0)和一张无线网卡(wlan0)
 
 ### multipath route setting(多重路由,负载均衡设置)
 
+设置多重路由和负载均衡
+
 	ip ro add default nexthop via 172.20.101.1 dev br0 weight 1 nexthop via 172.20.236.1 dev wlan0 weight 1
 
-	$ ip ro sh
+查看路由情况(ip route show)
+
 	default
 			nexthop via 172.20.101.1  dev br0 weight 1
 			nexthop via 172.20.236.1  dev wlan0 weight 1
@@ -90,8 +93,43 @@ HOST上有一张有线网卡eth0(br0)和一张无线网卡(wlan0)
 
 ### FAQ
 
-对于虚拟机是linux系统,在host和guest中都反向过滤技术会是两块网卡无法同时使用
+对于虚拟机是linux系统,在host和guest中都需要配置反向过滤才能使两块网卡同时使用
 
 需要修改(改成0或2)相应的网卡的rp_filter配置
 
 	echo 0 > /proc/sys/net/ipv4/conf/wlan0/rp_filter
+
+## 网络模式热切换,网卡热插拔(使用qmp命令, 示例如下)
+
+- netdev_add对应qemu命令行启动参-netdev
+- device_add对应qemu命令行启动参-device
+
+### NAT模式下网卡热插拔
+
+移除网卡
+
+	device_del e1ke
+	netdev_del nd1
+
+	device_del e1k
+	netdev_del nd0
+
+添加网卡
+
+	netdev_add tap,id=nd0,ifname=tap0,script=./nat_up.py,downscript=./nat_down.py
+	device_add e1000,id=e1k,netdev=nd0,mac=52:54:00:ff:3b:f5,bus=pci.0,addr=0x3
+
+	netdev_add tap,id=nd1,ifname=tap1,script=./nat_up.py,downscript=./nat_down.py
+	device_add e1000,id=e1ke,netdev=nd1,mac=52:54:00:68:00:22,bus=pci.0,addr=0x7
+
+### 桥接模式网卡热插拔
+
+移除网卡
+
+	device_del net-0
+	netdev_del hostnet-0
+
+添加网卡
+
+	netdev_add tap,id=hostnet-0,vhost=on,script=./bridge_up.sh,downscript=./bridge_down.sh
+	device_add virtio-net-pci,netdev=hostnet-0,id=net-0,mac=52:54:00:ff:3b:f5,bus=pci.0,addr=0x03
