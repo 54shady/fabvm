@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from fall import get_netcard
 import sys
-from net_util import run_command, run_cmdlist
+from net_util import *
 import os
-import psutil
-from subprocess import check_output
 
 
 def check_bridge(br):
@@ -54,9 +51,6 @@ def add_filter_rules(br, network, mask="255.255.255.0"):
 def start_dnsmasq(br, gw, dhcprange, dual_nat=False):
     ''' only need one dnsmasq '''
     if dual_nat:
-        def get_pid(name):
-            return map(int, check_output(["pidof", name]).split())
-
         # backup old dnsmasq args
         pid = get_pid('dnsmasq')
         with open('/proc/%s/cmdline' % pid[0]) as f:
@@ -96,21 +90,21 @@ def config_tap(tap, br):
 
 
 def main():
-    br = "natbr0"
-    tmpfile = '/tmp/qemu-nat-%s' % os.getppid()
-    if not os.access(tmpfile, os.F_OK):
-        with open(tmpfile, 'w') as f:
-            pass
-        print "First NAT"
-        dual_nat = False
-    else:
-        print "Dual NAT"
+    lbr = []
+    br = "natbr%s" % sys.argv[1][-1]
+    nr_br = run_command('brctl show | grep natbr | wc -l')
+    lret = list(nr_br.strip('\n').split('\n'))
+    for line in lret:
+        lline = list(line.split('\t'))
+        lbr.append(lline[0])
+
+    dual_nat = False
+    if int(nr_br) >= 1:
         dual_nat = True
-        br = "natbr1"
 
     ret = check_bridge(br)
 
-    aa = get_netcard()
+    aa = get_netcard(dual_nat, lbr)
     gw = "%s.168.53.1" % aa
     network = "%s.168.53.0" % aa
     dhcprange = "%s.168.53.100,%s.168.53.254" % (aa, aa)

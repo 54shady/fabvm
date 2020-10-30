@@ -104,6 +104,14 @@ HOST上有一张有线网卡eth0(br0)和一张无线网卡(wlan0)
 - netdev_add对应qemu命令行启动参-netdev
 - device_add对应qemu命令行启动参-device
 
+使用hmp来进入到qmp console(qemu/scripts/qmp/qmp-shell)
+
+	./qmp-shell -H /tmp/vm.monitor
+
+退出hmp console
+
+	ctrl+d
+
 ### NAT模式下网卡热插拔
 
 移除网卡
@@ -120,7 +128,7 @@ HOST上有一张有线网卡eth0(br0)和一张无线网卡(wlan0)
 	device_add e1000,id=e1k,netdev=nd0,mac=52:54:00:ff:3b:f5,bus=pci.0,addr=0x3
 
 	netdev_add tap,id=nd1,ifname=tap1,script=./nat_up.py,downscript=./nat_down.py
-	device_add e1000,id=e1ke,netdev=nd1,mac=52:54:00:68:00:22,bus=pci.0,addr=0x7
+	device_add e1000e,id=e1ke,netdev=nd1,mac=52:54:00:68:00:22,bus=pci.0,addr=0x7
 
 ### 桥接模式网卡热插拔
 

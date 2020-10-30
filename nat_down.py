@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from fall import get_netcard
 import sys
-from net_util import run_command, run_cmdlist
+from net_util import *
 
 
-def main(tap, br, gw, network, mask="255.255.255.0"):
+def main(tap, br, gw, network, dhcprange, mask="255.255.255.0"):
     cmds = [
         "iptables -t nat -D POSTROUTING -s %s/%s -j MASQUERADE" % (
             network, mask),
@@ -28,10 +27,23 @@ def main(tap, br, gw, network, mask="255.255.255.0"):
 
     cmds = [
         "ifconfig %s down" % br,
-        "brctl delbr %s" % br,
-        "pkill dnsmasq"
+        "brctl delbr %s" % br
     ]
     run_cmdlist(cmds)
+
+    nr_br = run_command('brctl show | grep natbr | wc -l')
+    if int(nr_br) == 0:
+        run_command('pkill dnsmasq')
+    else:
+        pid = get_pid('dnsmasq')
+        with open('/proc/%s/cmdline' % pid[0]) as f:
+            ret = f.read().replace('\0', ' ')
+        lret = list(ret.strip('\n').split(' '))
+        run_command('pkill dnsmasq')
+        lret.remove("--interface=%s" % br)
+        lret.remove("--listen-address=%s" % gw)
+        lret.remove("--dhcp-range=%s" % dhcprange)
+        run_command(' '.join(lret))
 
 
 def find_vir_br(tap):
@@ -61,4 +73,5 @@ if __name__ == '__main__':
     aa = find_vir_aa(br)
     gw = "%s.168.53.1" % aa
     network = "%s.168.53.0" % aa
-    main(sys.argv[1], br, gw, network)
+    dhcprange = "%s.168.53.100,%s.168.53.254" % (aa, aa)
+    main(sys.argv[1], br, gw, network, dhcprange)
