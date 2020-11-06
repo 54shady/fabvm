@@ -17,7 +17,16 @@ def run_command(cmd, stdin=None, stdout=PIPE, stderr=None):
         print('Stop')
 
 
-parser = argparse.ArgumentParser(description="LaunchQemu")
+parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description='''
+        LaunchQemu
+        NAT:
+        sudo python3 bootinone.py --up nat_up.py --do nat_down.py
+
+        Bridge:
+        sudo python3 bootinone.py
+        ''')
 parser.add_argument("-n", "--name", type=str,
                     default="demo",
                     help="guest name")
@@ -52,6 +61,9 @@ parser.add_argument("--remove", type=str,
 args = parser.parse_args()
 mac1 = run_command("openssl rand -base64 8 | md5sum | cut -c1-2")
 mac2 = run_command("openssl rand -base64 8 | md5sum | cut -c1-2")
+# convert byte to string
+mac1 = mac1.decode()
+mac2 = mac2.decode()
 
 qemu = '/usr/bin/qemu-system-x86_64'
 name = '-name guest=%s,debug-threads=on' % args.name
@@ -70,14 +82,14 @@ nhpet = '-no-hpet'
 nsd = '-no-shutdown'
 boot = '-boot strict=on'
 dev = '-device piix3-usb-uhci,id=usb'
-drv = '-drive file=%s,format=qcow2,if=none,id=drive-ide0-0-0' % args.disk
-dev += ' -device ide-hd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0,bootindex=1'
-nic = '''-netdev tap,id=hostnet0,vhost=on,script=%s,downscript=%s \
--device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:1b:%s:%s''' % (
-    args.up, args.do, mac1[0:2], mac2[0:2])
-dev += ' -device usb-tablet,id=input0,bus=usb.0,port=1'
+drv = '-drive file=%s,format=qcow2,if=none,id=hd0' % args.disk
+dev += ' -device ide-hd,drive=hd0,bootindex=1'
+nic = '''-netdev tap,id=nd0,vhost=on,script=%s,downscript=%s \
+-device e1000,netdev=nd0,id=net0,mac=52:54:00:1b:%s:%s''' % (
+        args.up, args.do, mac1[0:2], mac2[0:2])
+dev += ' -device usb-tablet,id=input0'
 vnc = '-vnc 0.0.0.0:0'
-dev += ' -device qxl-vga,id=video0,ram_size=67108864,vram_size=67108864,vram64_size_mb=0,vgamem_mb=16'
+dev += ' -device qxl-vga,id=video0'
 msg = '-msg timestamp=on'
 
 # map for remove
