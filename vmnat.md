@@ -106,7 +106,9 @@ HOST上有一张有线网卡eth0(br0)和一张无线网卡(wlan0)
 
 使用hmp来进入到qmp console(qemu/scripts/qmp/qmp-shell)
 
-	./qmp-shell -H /tmp/vm.monitor
+	./qmp-shell -H /tmp/demo.monitor
+	or
+	sudo /path/to/qmp-shell -H /tmp/demo.monitor
 
 退出hmp console
 

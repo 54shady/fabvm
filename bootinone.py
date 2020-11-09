@@ -18,8 +18,8 @@ def run_command(cmd, stdin=None, stdout=PIPE, stderr=None):
 
 
 parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description='''
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description='''
         LaunchQemu
         NAT:
         sudo python3 bootinone.py --up nat_up.py --do nat_down.py
@@ -86,18 +86,22 @@ drv = '-drive file=%s,format=qcow2,if=none,id=hd0' % args.disk
 dev += ' -device ide-hd,drive=hd0,bootindex=1'
 nic = '''-netdev tap,id=nd0,vhost=on,script=%s,downscript=%s \
 -device e1000,netdev=nd0,id=net0,mac=52:54:00:1b:%s:%s''' % (
-        args.up, args.do, mac1[0:2], mac2[0:2])
+    args.up, args.do, mac1[0:2], mac2[0:2])
 dev += ' -device usb-tablet,id=input0'
 vnc = '-vnc 0.0.0.0:0'
 dev += ' -device qxl-vga,id=video0'
 msg = '-msg timestamp=on'
+qmp = '-qmp unix:/tmp/%s.monitor,server,nowait' % args.name
+misc = '-D ./%s.log -writeconfig ./%s.conf' % (args.name, args.name)
 
 # map for remove
 d = {"nic": nic}
 
 # launch qemu with command
 lcmdline = [qemu, name, machine, cpu, m, rt, smp, nuc, nd,
-            rtc, gb, nhpet, nsd, boot, dev, drv, nic, vnc, msg]
+            rtc, gb, nhpet, nsd, boot, dev, drv, nic, vnc, msg,
+            qmp, misc
+            ]
 
 # maybe remove some config
 if args.remove:
