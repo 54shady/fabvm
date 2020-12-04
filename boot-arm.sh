@@ -11,6 +11,15 @@
 #-drive file=$@,format=qcow2,if=none,id=scsidisk0,cache=writeback \
 #-device scsi-hd,bus=scsi0.0,channel=0,scsi-id=0,lun=2,drive=scsidisk0,bootindex=1,write-cache=on \
 
+# virtio input device
+#-device virtio-tablet-pci \
+#-device virtio-keyboard-pci \
+
+# cdrom
+#-device virtio-scsi-pci,id=scsi0 \
+#-drive file=/path/to/cdrom.iso,format=raw,if=none,id=drive-scsi0-0-0-0,readonly=on \
+#-device scsi-cd,bus=scsi0.0,channel=0,scsi-id=0,lun=0,drive=drive-scsi0-0-0-0,id=scsi0-0-0-0,bootindex=1 \
+
 exec qemu-system-aarch64 \
 	-enable-kvm \
 	-cpu host \
@@ -27,14 +36,15 @@ exec qemu-system-aarch64 \
 	-k en-us \
 	-device pcie-root-port,id=pcierp0,multifunction=on \
 	-device pcie-pci-bridge,id=pcibus0,bus=pcierp0 \
-	-device piix3-usb-uhci,bus=pcibus0,addr=0x1 \
-	-netdev tap,id=hostnet0,vhost=on,script=./bridge_up.sh,downscript=./bridge_down.sh \
-	-device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:1b:fa:b2 \
+    -device piix3-usb-uhci,id=usbhub0,bus=pcibus0,addr=0x1 \
+	-device usb-tablet,bus=usbhub0.0 \
+	-device qemu-xhci,id=usbhub1 \
+	-device usb-kbd,bus=usbhub1.0 \
+    -netdev tap,id=hostnet0,vhost=on,script=./bridge_up.sh,downscript=./bridge_down.sh \
+    -device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:1b:fa:b2 \
 	-drive file=$@,format=qcow2,if=none,id=disk0,cache=none \
 	-device virtio-blk,drive=disk0 \
 	-device virtio-gpu-pci \
-	-device virtio-tablet-pci \
-	-device virtio-keyboard-pci \
 	-vnc 0.0.0.0:0 \
 	-sandbox off \
 	-msg timestamp=on
