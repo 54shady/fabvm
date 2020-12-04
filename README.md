@@ -92,3 +92,4 @@ tablet是绝对坐标而mouse是相对坐标
 - 鼠标有飘动异常
 
 ## [虚拟机中NAT网络模式](./vmnat.md)
+## [虚拟机中SPDK](./spdk.md)
