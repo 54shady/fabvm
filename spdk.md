@@ -22,7 +22,7 @@
 设置大页内存并启动vhost应用程序(指定路径在/var/tmp下)
 
 	HUGEMEM=2048 ./scripts/setup.sh
-	./app/vhost/vhost -S /var/tmp -s 1024 -m 0x3
+	build/bin/vhost -S /var/tmp -s 1024 -m 0x3
 
 创建SPDK bdev(SPDK中对多种存储后端storage backend的抽象)
 
