@@ -20,13 +20,25 @@
 #-drive file=/path/to/cdrom.iso,format=raw,if=none,id=drive-scsi0-0-0-0,readonly=on \
 #-device scsi-cd,bus=scsi0.0,channel=0,scsi-id=0,lun=0,drive=drive-scsi0-0-0-0,id=scsi0-0-0-0,bootindex=1 \
 
+# spdk storage
+#-object memory-backend-file,id=mem0,size=4G,mem-path=/dev/hugepages,share=on \
+#-numa node,memdev=mem0 \
+#-chardev socket,id=spdk_vhost_scsi0,path=/var/tmp/vhost.0 \
+#-device vhost-user-scsi-pci,chardev=spdk_vhost_scsi0,num_queues=4,bootindex=2 \
+#-chardev socket,id=spdk_vhost_blk0,path=/var/tmp/vhost.1 \
+#-device vhost-user-blk-pci,chardev=spdk_vhost_blk0,bootindex=3 \
+
+# monitor
+#-monitor tcp:127.0.0.1:9999,server,nowait \
+# nc 127.0.0.1 9999
+
 exec qemu-system-aarch64 \
 	-enable-kvm \
 	-cpu host \
 	-machine virt,accel=kvm,usb=off,dump-guest-core=off,gic-version=3 \
 	-name guest=demo,debug-threads=on \
 	-drive file=/usr/share/AAVMF/AAVMF_CODE.fd,if=pflash,format=raw,unit=0,readonly=on \
-	-m 8192 \
+	-m 4G \
 	-smp 8 \
 	-no-user-config \
 	-nodefaults \
@@ -36,14 +48,14 @@ exec qemu-system-aarch64 \
 	-k en-us \
 	-device pcie-root-port,id=pcierp0,multifunction=on \
 	-device pcie-pci-bridge,id=pcibus0,bus=pcierp0 \
-    -device piix3-usb-uhci,id=usbhub0,bus=pcibus0,addr=0x1 \
+	-device piix3-usb-uhci,id=usbhub0,bus=pcibus0,addr=0x1 \
 	-device usb-tablet,bus=usbhub0.0 \
 	-device qemu-xhci,id=usbhub1 \
 	-device usb-kbd,bus=usbhub1.0 \
-    -netdev tap,id=hostnet0,vhost=on,script=./bridge_up.sh,downscript=./bridge_down.sh \
-    -device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:1b:fa:b2 \
+	-netdev tap,id=hostnet0,vhost=on,script=./bridge_up.sh,downscript=./bridge_down.sh \
+	-device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:1b:fa:b2 \
 	-drive file=$@,format=qcow2,if=none,id=disk0,cache=none \
-	-device virtio-blk,drive=disk0 \
+	-device virtio-blk,drive=disk0,bootindex=1 \
 	-device virtio-gpu-pci \
 	-vnc 0.0.0.0:0 \
 	-sandbox off \

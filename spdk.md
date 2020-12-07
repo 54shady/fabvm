@@ -61,7 +61,7 @@
 
 ### QEMU中使用
 
-qemu参数添加如下
+[qemu参数添加如下boot-arm.sh](./boot-arm.sh)
 
 	-m 4G -object memory-backend-file,id=mem0,size=4G,mem-path=/dev/hugepages,share=on -numa node,memdev=mem0
 
