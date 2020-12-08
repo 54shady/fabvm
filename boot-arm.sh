@@ -53,10 +53,9 @@ exec qemu-system-aarch64 \
 	-k en-us \
 	-device pcie-root-port,id=pcierp0,multifunction=on \
 	-device pcie-pci-bridge,id=pcibus0,bus=pcierp0 \
-	-device piix3-usb-uhci,id=usbhub0,bus=pcibus0,addr=0x1 \
-	-device usb-tablet,bus=usbhub0.0 \
 	-device qemu-xhci,id=usbhub1 \
 	-device usb-kbd,bus=usbhub1.0 \
+	-device usb-tablet,bus=usbhub1.0 \
 	-netdev tap,id=hostnet0,vhost=on,script=./bridge_up.sh,downscript=./bridge_down.sh \
 	-device virtio-net-pci,netdev=hostnet0,id=net0,mac=52:54:00:1b:fa:b2 \
 	-drive file=$@,format=qcow2,if=none,id=disk0,cache=none \
