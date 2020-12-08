@@ -32,6 +32,11 @@
 #-monitor tcp:127.0.0.1:9999,server,nowait \
 # nc 127.0.0.1 9999
 
+# for case that cpu can no schedule properly will case a slow gueset
+# should schedule the cpu manually
+# for example : set cpu run on range cpu from 100 to 120
+#exec taskset -c 100-120 qemu-system-aarch64 \
+
 exec qemu-system-aarch64 \
 	-enable-kvm \
 	-cpu host \
