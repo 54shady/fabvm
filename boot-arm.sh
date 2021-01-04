@@ -32,6 +32,11 @@
 #-monitor tcp:127.0.0.1:9999,server,nowait \
 # nc 127.0.0.1 9999
 
+# scsi storage
+#-device megasas,id=scsi1 \
+#-drive file=$@,format=qcow2,if=none,id=disk0,cache=none \
+#-device scsi-hd,bus=scsi1.0,drive=disk0,scsi-id=1,bootindex=1 \
+
 # for case that cpu can no schedule properly will case a slow gueset
 # should schedule the cpu manually
 # for example : set cpu run on range cpu from 100 to 120
