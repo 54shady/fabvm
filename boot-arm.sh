@@ -15,10 +15,10 @@
 #-device virtio-tablet-pci \
 #-device virtio-keyboard-pci \
 
-# cdrom
+# scsi cdrom
 #-device virtio-scsi-pci,id=scsi0 \
-#-drive file=/path/to/cdrom.iso,format=raw,if=none,id=drive-scsi0-0-0-0,readonly=on \
-#-device scsi-cd,bus=scsi0.0,channel=0,scsi-id=0,lun=0,drive=drive-scsi0-0-0-0,id=scsi0-0-0-0,bootindex=1 \
+#-drive file=/path/to/cdrom.iso,format=raw,if=none,id=scsicdrom,readonly=on \
+#-device scsi-cd,bus=scsi0.0,channel=0,scsi-id=0,lun=0,drive=scsicdrom,id=cdrom,bootindex=2 \
 
 # spdk storage
 #-object memory-backend-file,id=mem0,size=4G,mem-path=/dev/hugepages,share=on \
