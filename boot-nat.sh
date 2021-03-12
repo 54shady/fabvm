@@ -6,6 +6,9 @@
 # auto login
 # sshpass -p 0 ssh root@`awk '{ if ($4 == "52:54:00:12:34:27") print $1 }' /proc/net/arp`
 
+# auto get ip address accroding to the mac address
+# grep `virsh dumpxml vmname | grep 'mac address' | cut -b 21-37` /proc/net/arp  | awk '{ print $1 }'
+
 # disk 2
 #-drive file=./data.qcow2,format=qcow2,if=none,id=scsidisk1,cache=writeback \
 #-device scsi-hd,bus=scsi0.0,channel=0,scsi-id=1,lun=2,drive=scsidisk1,bootindex=3,write-cache=on \
