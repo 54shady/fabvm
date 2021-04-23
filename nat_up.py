@@ -93,7 +93,10 @@ def main():
     lbr = []
     br = "natbr%s" % sys.argv[1][-1]
     nr_br = run_command('brctl show | grep natbr | wc -l')
-    lret = list(nr_br.strip('\n').split('\n'))
+    if sys.version_info > (3, 0):
+        lret = list(nr_br.decode().strip('\n').split('\n'))
+    else:
+        lret = list(nr_br.strip('\n').split('\n'))
     for line in lret:
         lline = list(line.split('\t'))
         lbr.append(lline[0])

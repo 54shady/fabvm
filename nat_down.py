@@ -49,7 +49,10 @@ def main(tap, br, gw, network, dhcprange, mask="255.255.255.0"):
 def find_vir_br(tap):
     ''' findout which bridge the tap device on '''
     ret = run_command('brctl show | grep %s' % tap)
-    lret = list(ret.strip('\n').split('\n'))
+    if sys.version_info > (3, 0):
+        lret = list(ret.decode().strip('\n').split('\n'))
+    else:
+        lret = list(ret.strip('\n').split('\n'))
     for line in lret:
         lline = list(line.split('\t'))
         if len(lline) == 6:
@@ -59,7 +62,10 @@ def find_vir_br(tap):
 def find_vir_aa(br):
     ''' findout the bridge IP aa.bb.cc.dd '''
     ret = run_command('ip -4 -br ad')
-    sret = str(ret)
+    if sys.version_info > (3, 0):
+        sret = str(ret.decode())
+    else:
+        sret = str(ret)
     lret = sret.strip('\n').split('\n')
     for i in range(len(lret)):
         ifname = lret[i].split()[0]
