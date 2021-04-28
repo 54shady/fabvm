@@ -1,5 +1,33 @@
 # 创建虚拟机的脚本
 
+## 关于网卡名eth0
+
+systemd源码中对网卡命名规则注释
+
+	 Two character prefixes based on the type of interface:
+	   en — Ethernet
+	   sl — serial line IP (slip)
+	   wl — wlan
+	   ww — wwan
+
+	 Type of names:
+	   b<number>                             — BCMA bus core number
+	   c<bus_id>                             — CCW bus group name, without leading zeros [s390]
+	   o<index>[d<dev_port>]                 — on-board device index number
+	   s<slot>[f<function>][d<dev_port>]     — hotplug slot index number
+	   x<MAC>                                — MAC address
+	   [P<domain>]p<bus>s<slot>[f<function>][d<dev_port>]
+											 — PCI geographical location
+	   [P<domain>]p<bus>s<slot>[f<function>][u<port>][..][c<config>][i<interface>]
+											 — USB port number chain
+
+所以enp3s0对应的就是pci接口的以太网bus3,slot0
+
+调试的时候有需要将其固定成eth0,在内核启动参数添加如下内容
+修改grub.cfg或/etc/default/grub 中GRUB_CMDLINE_LINUX中内容都可以
+
+	net.ifnames=0
+
 ## 启动虚拟机通用脚本
 
 通用脚本参考[boot_vm.sh](boot_vm.sh)

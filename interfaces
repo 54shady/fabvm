@@ -4,9 +4,15 @@
 
 #auto lo
 #iface lo inet loopback
-auto enp3s0
-iface enp3s0 inet static
-address 172.28.107.STUB
-netmask 255.255.252.0
-gateway 172.28.106.1
-dns-nameserver 192.168.5.28
+
+# static ip
+#auto eth0
+#iface eth0 inet static
+#address 172.28.107.STUB
+#netmask 255.255.252.0
+#gateway 172.28.106.1
+#dns-nameserver 192.168.5.28
+
+# dynamic ip
+auto eth0
+iface eth0 inet static
