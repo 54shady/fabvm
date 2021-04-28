@@ -46,11 +46,16 @@
 	<controller type='scsi' index='0' model='virtio-scsi'/>
 	<input type='tablet' bus='virtio'/>
 	<input type='keyboard' bus='virtio'/>
-    <interface type='bridge'>
-      <mac address='52:54:00:1b:macstubcode'/>
-      <source bridge='br0'/>
-      <model type='virtio'/>
-    </interface>
+<!--    <interface type='bridge'>-->
+<!--      <mac address='52:54:00:1b:macstubcode'/>-->
+<!--      <source bridge='br0'/>-->
+<!--      <model type='virtio'/>-->
+<!--    </interface>-->
+	<interface type='network'>
+       <mac address='52:54:00:1b:macstubcode'/>
+	   <source network='default'/>
+	   <model type='virtio'/>
+	</interface>
     <video>
       <model type='virtio' heads='1' primary='yes'/>
       <alias name='video0'/>
