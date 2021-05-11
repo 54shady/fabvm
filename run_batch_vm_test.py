@@ -7,9 +7,10 @@ import random
 import paramiko
 import argparse
 
+from doip import libvirt_getip
 
 def remote_test_routine(index, lock, args):
-    ipaddr = "172.28.109.%d" % (100 + index)
+    ipaddr = libvirt_getip('demo-%d' % index)
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
