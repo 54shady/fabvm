@@ -2,7 +2,7 @@
 # coding=utf-8
 
 from subprocess import PIPE, Popen
-import sys
+import argparse
 
 
 def run_command(cmd, stdin=None, stdout=PIPE, stderr=None):
@@ -30,7 +30,7 @@ def pid2name(pid):
 
 def pid2vnc(pid):
     cmd = ''' cat /proc/%s/cmdline | tr '\\0' '\\n' | grep vnc -A1 ''' % pid
-    return run_command(cmd).decode().split(',')[0][len('-vnc'):].strip()
+    return run_command(cmd).decode().split(',')[0][len('-vnc'):].strip().split(':')[1]
 
 
 def pid2mac(pid):
@@ -53,11 +53,43 @@ def queryinfo(vm):
             mac = pid2mac(pid)
             ip = mac2ip(mac)
             vncp = pid2vnc(pid)
-            return (vm, mac, ip, vncp)
+            return (vm, pid, mac, ip, vncp)
 
 
 def main():
-    print(queryinfo(sys.argv[1]))
+    parser = argparse.ArgumentParser(description="Getvm Info")
+
+    parser.add_argument("-p", "--pid", help="Get pid by vm name",
+                        action="store_true")
+
+    parser.add_argument("-m", "--mac", help="Get mac by vm name",
+                        action="store_true")
+
+    parser.add_argument("-v", "--vnc", help="Get vnc by vm name",
+                        action="store_true")
+
+    parser.add_argument("-i", "--ip", help="Get ip by vm name",
+                        action="store_true")
+
+    parser.add_argument("-n", "--name", help="vm name", required=True,
+                        type=str)
+    # input args
+    iargs = parser.parse_args()
+
+    if iargs.pid:
+        _, x, _, _, _ = queryinfo(iargs.name)
+        print(x)
+    elif iargs.mac:
+        _, _, x, _, _ = queryinfo(iargs.name)
+        print(x)
+    elif iargs.vnc:
+        _, _, _, _, x = queryinfo(iargs.name)
+        print(x)
+    elif iargs.ip:
+        _, _, _, x, _ = queryinfo(iargs.name)
+        print(x)
+    else:  # defaul print all info
+        print(queryinfo(iargs.name))
 
 
 if __name__ == '__main__':
