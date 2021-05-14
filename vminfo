@@ -54,6 +54,9 @@ def queryinfo(vm):
             ip = mac2ip(mac)
             vncp = pid2vnc(pid)
             return (vm, pid, mac, ip, vncp)
+        else:
+            print("No %s found!!!" % vm)
+            return None
 
 
 def main():
@@ -76,20 +79,22 @@ def main():
     # input args
     iargs = parser.parse_args()
 
-    if iargs.pid:
-        _, x, _, _, _ = queryinfo(iargs.name)
-        print(x)
-    elif iargs.mac:
-        _, _, x, _, _ = queryinfo(iargs.name)
-        print(x)
-    elif iargs.vnc:
-        _, _, _, _, x = queryinfo(iargs.name)
-        print(x)
-    elif iargs.ip:
-        _, _, _, x, _ = queryinfo(iargs.name)
-        print(x)
-    else:  # defaul print all info
-        print(queryinfo(iargs.name))
+    res = queryinfo(iargs.name)
+    if res is not None:
+        if iargs.pid:
+            _, x, _, _, _ = res
+            print(x)
+        elif iargs.mac:
+            _, _, x, _, _ = res
+            print(x)
+        elif iargs.vnc:
+            _, _, _, _, x = res
+            print(x)
+        elif iargs.ip:
+            _, _, _, x, _ = res
+            print(x)
+        else:  # defaul print all info
+            print(res)
 
 
 if __name__ == '__main__':
