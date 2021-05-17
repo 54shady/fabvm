@@ -54,9 +54,8 @@ def queryinfo(vm):
             ip = mac2ip(mac)
             vncp = pid2vnc(pid)
             return (vm, pid, mac, ip, vncp)
-        else:
-            print("No %s found!!!" % vm)
-            return None
+    print("No %s found!!!" % vm)
+    return None
 
 
 def main():
