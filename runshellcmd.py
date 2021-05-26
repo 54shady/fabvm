@@ -13,10 +13,3 @@ def run_command(cmd, stdin=None, stdout=PIPE, stderr=None):
         return out
     except KeyboardInterrupt:
         print('Stop')
-
-
-def libvirt_getip(doname):
-    cmd = 'virsh domifaddr %s' % doname
-    ret = run_command(cmd)
-    ip = ret.decode().split()[-1]
-    return ip[:-3]
