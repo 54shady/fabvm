@@ -7,10 +7,11 @@ import random
 import paramiko
 import argparse
 
-from doip import libvirt_getip
+from vminfo import queryinfo
+
 
 def remote_test_routine(index, lock, args):
-    ipaddr = libvirt_getip('demo-%d' % index)
+    _, _, _, ipaddr, _ = queryinfo('demo-%d' % index)
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
@@ -87,13 +88,13 @@ if __name__ == '__main__':
             print("%02d" % i, r.decode().split(' ')[-1], df)
         elif iargs.systemd:
             # for linux(systemd) boot time aa.bb second
-            if len(lres[i].split(' ')) == 15: # less then 60s
+            if len(lres[i].split(' ')) == 15:  # less then 60s
                 record = "%2d %s" % (i, lres[i].split(' ')[-1][:-4])
-            else: # more then 60s
+            else:  # more then 60s
                 if lres[i].split(' ')[-2] == '1min':
                     minute = 60.0
                     tmp = float(lres[i].split(' ')[-1][:-4])
-                    if tmp >= 60.0: # this means it is micro second
+                    if tmp >= 60.0:  # this means it is micro second
                         second = 0
                     else:
                         second = tmp
